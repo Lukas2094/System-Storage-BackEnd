@@ -1,43 +1,60 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+// src/auth/jwt.strategy.ts
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from './auth.service';
-import { ConfigService } from '@nestjs/config';
-import { BlacklistService } from './blacklist.service';
+import { ConfigService } from '@nestjs/config'; // Importe o ConfigService
+import { BlacklistService } from './blacklist.service'; // Importe o BlacklistService
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
         private authService: AuthService,
-        private configService: ConfigService,
-        private blacklistService: BlacklistService,
+        private configService: ConfigService, // Injete o ConfigService
+        private blacklistService: BlacklistService, // Injete o BlacklistService
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: configService.get<string>('JWT_SECRET'),
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), // Extrai o token do cabeçalho Authorization
+            secretOrKey: configService.get<string>('JWT_SECRET'), // Use o ConfigService para acessar a chave secreta
         });
     }
 
-    async validate(payload: any, context: ExecutionContext) {
-        const token = this.getTokenFromRequest(context);
-        if (this.blacklistService.isBlacklisted(token)) {
-            throw new UnauthorizedException('Token inválido');
-        }
-
+    async validate(payload: any) {
+        // Valida o usuário
         const user = await this.authService.validateUser(payload.email);
         if (!user) {
             throw new UnauthorizedException('Usuário não encontrado');
         }
+
+        // Verifica se o token está na blacklist
+        const token = this.getTokenFromRequest();
+        if (this.blacklistService.isBlacklisted(token)) {
+            throw new UnauthorizedException('Token inválido');
+        }
+
         return user;
     }
 
-    private getTokenFromRequest(context: ExecutionContext): string {
-
-        const request = context.switchToHttp().getRequest();
+    private getTokenFromRequest(): string {
+        // Extrai o token do cabeçalho Authorization
+        const request = this.getRequest(); // Obtém o objeto request
         const authHeader = request.headers.authorization;
         if (!authHeader) {
             throw new UnauthorizedException('Token não fornecido');
         }
-        return authHeader.split(' ')[1];
+        return authHeader.split(' ')[1]; // Retorna o token (Bearer <token>)
+    }
+
+    private getRequest() {
+        // Obtém o objeto request do contexto
+        const context = this.getContext();
+        if (!context) {
+            throw new UnauthorizedException('Contexto não disponível');
+        }
+        return context.switchToHttp().getRequest();
+    }
+
+    private getContext() {
+        return this.getRequest();
     }
 }
