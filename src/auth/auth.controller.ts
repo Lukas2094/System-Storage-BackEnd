@@ -21,7 +21,7 @@ export class AuthController {
     }
 
     @Post('logout')
-    @UseGuards(AuthGuard('jwt')) // Protege a rota com JWT
+    @UseGuards(AuthGuard('jwt')) 
     async logout(@Req() request: any) {
         const token = request.headers.authorization.split(' ')[1];
         this.blacklistService.addToBlacklist(token);
