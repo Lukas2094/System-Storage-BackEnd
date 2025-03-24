@@ -12,9 +12,9 @@ export class EstoqueController {
     create(@Body() estoque: Estoque): Promise<Estoque> {
         return this.estoqueService.create(estoque);
     }
-
+    
+    @UseGuards(JwtAuthGuard)  
     @Get()
-    @UseGuards(JwtAuthGuard)    
     findAll(): Promise<Estoque[]> {
         return this.estoqueService.findAll();
     }

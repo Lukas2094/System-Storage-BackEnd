@@ -7,24 +7,24 @@ import { Users } from '../users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config'; // Importe o ConfigModule e ConfigService
-import { BlacklistService } from './blacklist.service'; // Importe o BlacklistService
+import { ConfigModule, ConfigService } from '@nestjs/config'; 
+import { BlacklistService } from './blacklist.service';
 
 @Module({
     imports: [
+        ConfigModule.forRoot(),
         TypeOrmModule.forFeature([Users]),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
-            imports: [ConfigModule], // Importe o ConfigModule
+            imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'), // Use o ConfigService para acessar a chave secreta
+                secret: configService.get<string>('JWT_SECRET'),
                 signOptions: { expiresIn: '1h' },
             }),
-            inject: [ConfigService], // Injete o ConfigService
+            inject: [ConfigService],
         }),
-        ConfigModule.forRoot(), // Certifique-se de que o ConfigModule está sendo importado
     ],
-    providers: [AuthService, JwtStrategy, BlacklistService], // Adicione o BlacklistService
+    providers: [AuthService, JwtStrategy, BlacklistService],
     controllers: [AuthController],
     exports: [JwtStrategy, PassportModule],
 })
