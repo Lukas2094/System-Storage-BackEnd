@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Put, UseGuards, Param, Req } from '@nestjs/common';
+import { Controller, Post, Body, Put, UseGuards, Param, Req, NotFoundException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
@@ -36,5 +36,20 @@ export class AuthController {
     ): Promise<void> {
         const { currentPassword, newPassword } = body;
         return this.authService.updatePassword(userId, currentPassword, newPassword);
+    }
+
+    @Post('forgot-password')
+    async forgotPassword(@Body('email') email: string) {
+        const result = await this.authService.forgotPassword(email);
+        if (!result) {
+            throw new NotFoundException('E-mail não encontrado');
+        }
+        return { message: 'E-mail de redefinição enviado!' };
+    }
+
+    @Post('reset-password')
+    async resetPassword(@Body() body: { token: string; newPassword: string }) {
+        const { token, newPassword } = body;
+        return this.authService.resetPassword(token, newPassword);
     }
 }

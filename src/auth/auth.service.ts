@@ -51,6 +51,36 @@ export class AuthService {
         await this.userRepository.save(user);
     }
 
+    async forgotPassword(email: string): Promise<boolean> {
+        const user = await this.userRepository.findOne({ where: { email } });
+        if (!user) {
+            return false;
+        }
+
+        const resetToken = this.jwtService.sign({ email }, { expiresIn: '1h' });
+
+        console.log(`Token de redefinição de senha: ${resetToken}`);
+
+        return true;
+    }
+
+    async resetPassword(token: string, newPassword: string): Promise<void> {
+        try {
+            const decoded = this.jwtService.verify(token);
+            const user = await this.userRepository.findOne({ where: { email: decoded.email } });
+
+            if (!user) {
+                throw new NotFoundException('Usuário não encontrado');
+            }
+
+            const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+            user.password = hashedNewPassword;
+            await this.userRepository.save(user);
+        } catch (error) {
+            throw new UnauthorizedException('Token inválido ou expirado');
+        }
+    }
+
     async validateUser(email: string): Promise<Users | null> {
         return this.userRepository.findOne({ where: { email } });
     }
