@@ -20,8 +20,8 @@ export class AuthController {
         return { accessToken };
     }
 
-    @Post('logout')
     @UseGuards(AuthGuard('jwt')) 
+    @Post('logout')
     async logout(@Req() request: any) {
         const token = request.headers.authorization.split(' ')[1];
         this.blacklistService.addToBlacklist(token);
