@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
+import { Movimentacao } from './movimentacao.entity';
 @Entity()
 export class Estoque {
     @PrimaryGeneratedColumn()

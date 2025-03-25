@@ -5,6 +5,7 @@ import { EstoqueModule } from './estoque/estoque.module';
 import { Estoque } from './estoque/entities/estoque.entity';
 import { Users } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { Movimentacao } from './estoque/entities/movimentacao.entity';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.DB_USERNAME, // Usa a variável de ambiente DB_USERNAME
       password: process.env.DB_PASSWORD, // Usa a variável de ambiente DB_PASSWORD
       database: process.env.DB_DATABASE, // Usa a variável de ambiente DB_DATABASE
-      entities: [Estoque, Users], // Entidades (tabelas) que serão criadas no banco de dados 
+      entities: [Estoque, Users, Movimentacao], // Entidades (tabelas) que serão criadas no banco de dados 
       synchronize: true,
     }),
     EstoqueModule,
